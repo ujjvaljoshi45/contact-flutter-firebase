@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 // import 'package:hive_flutter/hive_flutter.dart';
 
 import 'package:my_contacts/models/contact.dart';
-import 'package:my_contacts/sqlite_service.dart';
 
 class ContactModel extends ChangeNotifier {
   List<Contact> contacts = [];
