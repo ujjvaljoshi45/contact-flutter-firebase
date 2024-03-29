@@ -1,48 +1,53 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-// import 'package:hive_flutter/hive_flutter.dart';
-
 import 'package:my_contacts/models/contact.dart';
 
 class ContactModel extends ChangeNotifier {
   List<Contact> contacts = [];
-  // late SqliteService sqliteService;
+  bool isRefreshed = false;
 
-  // ContactModel() {
-  // sqliteService = SqliteService();
-  // sqliteService.initializeDB().whenComplete(() async {
-  // refersh contacts
-  // await updateContactsListFromDatabase();
-  // });
-  // try {
-  //   getDataFromHive();
-  // } catch (e) {
-  //   print("Empty");
-  // }
-  // }
+  // Instance of Firestore
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  // final _myContacs = Hive.box('mycontacts');
   List<Contact> contactList() {
-    // updateContactsListFromDatabase();
+    if (!isRefreshed) {
+      updateContactsListFromDatabase();
+    }
     return contacts;
   }
 
-  // Future<void> updateContactsListFromDatabase() async {
-  //   final data = await SqliteService().getItems();
-  //   if (data.isNotEmpty) {
-  //     contacts = data;
-  //   }
-  //   notifyListeners();
-  // }
+  Future<void> updateContactsListFromDatabase() async {
+    CollectionReference cr = firestore.collection("contacts");
+
+    QuerySnapshot<Object?> res = await cr.get();
+
+    List<QueryDocumentSnapshot> listOfResult = res.docs;
+
+    List<Contact> newContacts = [];
+
+    for (var index in listOfResult) {
+      newContacts.add(Contact(name: index["name"], phno: index["phno"]));
+    }
+    contacts = newContacts;
+    isRefreshed = true;
+    notifyListeners();
+  }
 
   void addContact(String name, String phno) async {
     Contact newContact = Contact(name: name, phno: phno);
+
     contacts.add(newContact);
-    // addDataInHive();
-    // getDataFromHive();
 
     // add data to database
-    // await SqliteService().createItem(newContact);
+    await firestore
+        .collection("contacts")
+        .add({
+          "name": name,
+          "phno": phno,
+        })
+        .then((value) => print("Data Added"))
+        .catchError((e) => print("Error provider : $e"));
     notifyListeners();
   }
 

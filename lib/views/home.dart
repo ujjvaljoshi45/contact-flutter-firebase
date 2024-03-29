@@ -34,6 +34,7 @@ class _MyHomeState extends State<MyHome> {
       print("Length: ${contactList.length}");
       return Scaffold(
         appBar: AppBar(
+          elevation: 1,
           backgroundColor: const Color.fromRGBO(69, 96, 135, 1),
           title: const Text(
             'Contacts',
